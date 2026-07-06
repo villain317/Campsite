@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Approve Requests - Oakholm{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Pending Requests</h3>
+
+{% if not cards %}
+    <p class="text-muted">No pending requests right now.</p>
+{% endif %}
+
+<div class="row row-cols-1 row-cols-md-2 g-3">
+    {% for card in cards %}
+    <div class="col">
+        <div class="card h-100" style="border-top: 5px solid {{ card.family.color|default:'#6c757d' }};">
+            <div class="card-body">
+                <h5 class="card-title">
+                    {{ card.request.requested_by.get_full_name|default:card.request.requested_by.username }}
+                    {% if card.family %}<span class="badge" style="background-color: {{ card.family.color }};">{{ card.family.name }}</span>{% endif %}
+                </h5>
+                <p class="card-text mb-1">
+                    <strong>Dates:</strong> {{ card.request.start_date }} &ndash; {{ card.request.end_date }}
+                </p>
+                <p class="card-text mb-1">
+                    <strong>Estimated occupants:</strong> {{ card.request.estimated_occupants }}
+                </p>
+                <p class="card-text mb-1">
+                    <strong>Attendees:</strong>
+                    {% for person in card.request.people.all %}{{ person.full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                </p>
+                <p class="card-text text-muted small">Requested on {{ card.request.requested_at }}</p>
+
+                {% if card.overlaps %}
+                <div class="alert alert-warning py-2">
+                    <strong>Warning:</strong> overlaps with:
+                    <ul class="mb-0">
+                        {% for other in card.overlaps %}
+                        <li>{{ other.requested_by.get_full_name|default:other.requested_by.username }}
+                            ({{ other.start_date }} &ndash; {{ other.end_date }}, {{ other.status }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-2 mt-2">
+                    <form method="post" action="{% url 'reservations:approve_action' card.request.pk 'approve' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                    </form>
+                    <form method="post" action="{% url 'reservations:approve_action' card.request.pk 'deny' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Deny</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

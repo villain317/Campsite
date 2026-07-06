@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}New Request - Oakholm{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Request Oakholm</h3>
+
+<form method="post" class="col-md-8">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label" for="{{ form.start_date.id_for_label }}">Start date</label>
+            {{ form.start_date }}
+            {% for error in form.start_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" for="{{ form.end_date.id_for_label }}">End date</label>
+            {{ form.end_date }}
+            {% for error in form.end_date.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="{{ form.people.id_for_label }}">Who's coming?</label>
+        {{ form.people }}
+        <div class="form-text">Hold Ctrl/Cmd to select multiple people. You're included by default.</div>
+        {% for error in form.people.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="{{ form.estimated_occupants.id_for_label }}">Estimated number of occupants</label>
+        {{ form.estimated_occupants }}
+        {% for error in form.estimated_occupants.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit request</button>
+</form>
+
+{% endblock %}
