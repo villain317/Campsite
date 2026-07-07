@@ -37,6 +37,22 @@ CSRF_TRUSTED_ORIGINS = [
     if o.strip()
 ]
 
+# We sit behind Caddy (or another reverse proxy) that terminates TLS and
+# talks to gunicorn over plain HTTP on localhost. Trust its
+# X-Forwarded-Proto header so Django knows the original request was HTTPS.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+# Only enforce HTTPS/secure-cookie behavior when DEBUG is off, so local dev
+# (plain http://localhost:8000) keeps working without a proxy in front.
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7  # 1 week; raise once you're confident
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+
 
 # Application definition
 
