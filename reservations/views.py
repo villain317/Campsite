@@ -118,7 +118,7 @@ def request_create(request):
             reservation_request.requested_by = request.user
             reservation_request.save()
             form.save_m2m()
-            notify_family_head_of_request(reservation_request)
+            notify_family_head_of_request(request, reservation_request)
             messages.success(request, "Your request has been submitted.")
             return redirect("reservations:calendar")
     else:
