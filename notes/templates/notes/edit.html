@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Edit Note - Oakholm{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Edit Note</h3>
+
+<form method="post" enctype="multipart/form-data" class="col-md-8">
+    {% csrf_token %}
+    {{ form.body }}
+    {% for error in form.body.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+
+    {% if note.images.all %}
+    <div class="d-flex flex-wrap gap-2 my-2">
+        {% for img in note.images.all %}
+        <a href="{{ img.image.url }}" target="_blank">
+            <img src="{{ img.image.url }}" class="rounded" style="width:90px;height:90px;object-fit:cover;" alt="Note photo">
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="mt-2">
+        <label class="form-label">Add more photos</label>
+        <input type="file" name="images" accept="image/*" multiple class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Save changes</button>
+    <a href="{% url 'notes:list' %}" class="btn btn-outline-secondary mt-3">Cancel</a>
+</form>
+
+{% endblock %}

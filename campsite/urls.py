@@ -33,6 +33,7 @@ urlpatterns = [
         name="password_change_done",
     ),
     path("checklists/", include("checklists.urls")),
+    path("notes/", include("notes.urls")),
     path("", include("reservations.urls")),
 ]
 

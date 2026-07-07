@@ -46,6 +46,7 @@ class ChecklistRun(models.Model):
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default=STATUS_IN_PROGRESS)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    notes = models.TextField(blank=True, default="")
 
     class Meta:
         ordering = ["-started_at"]

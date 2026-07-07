@@ -97,6 +97,16 @@ def upload_image(request, run_id):
 
 @login_required
 @require_POST
+def update_notes(request, run_id):
+    run = get_object_or_404(ChecklistRun, pk=run_id, user=request.user, status=ChecklistRun.STATUS_IN_PROGRESS)
+    run.notes = request.POST.get("notes", "").strip()
+    run.save()
+    messages.success(request, "Notes saved.")
+    return redirect("checklists:run", checklist_id=run.checklist_id)
+
+
+@login_required
+@require_POST
 def complete_run(request, run_id):
     run = get_object_or_404(ChecklistRun, pk=run_id, user=request.user, status=ChecklistRun.STATUS_IN_PROGRESS)
     run.status = ChecklistRun.STATUS_COMPLETED

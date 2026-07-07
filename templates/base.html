@@ -51,6 +51,35 @@
             width: 100%;
             text-align: left;
         }
+        .note-card {
+            border: none;
+            border-left: 4px solid #6c757d;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.15s ease-in-out;
+        }
+        .note-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+        .note-card-archived {
+            border-left-color: #adb5bd;
+            opacity: 0.85;
+        }
+        .note-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #1d5b79;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .note-body {
+            white-space: pre-wrap;
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -95,6 +124,9 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{% url 'checklists:completed_list' %}">Completed Checklists</a></li>
                     </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'notes:list' %}">Notes</a>
                 </li>
                 {% endif %}
             </ul>

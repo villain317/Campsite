@@ -52,6 +52,13 @@
     <button type="submit" class="btn btn-outline-secondary">Upload photo(s)</button>
 </form>
 
+<h5>Notes</h5>
+<form method="post" action="{% url 'checklists:update_notes' run.pk %}" class="mb-4">
+    {% csrf_token %}
+    <textarea name="notes" class="form-control mb-2" rows="3" placeholder="Optional notes about this checklist run...">{{ run.notes }}</textarea>
+    <button type="submit" class="btn btn-outline-secondary">Save notes</button>
+</form>
+
 <form method="post" action="{% url 'checklists:complete_run' run.pk %}">
     {% csrf_token %}
     <button type="submit" class="btn btn-success">Complete checklist</button>

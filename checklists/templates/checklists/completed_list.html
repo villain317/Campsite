@@ -23,6 +23,9 @@
                         <li class="list-group-item text-muted">No items checked off.</li>
                     {% endfor %}
                 </ul>
+                {% if run.notes %}
+                <p class="card-text mb-2"><strong>Notes:</strong> {{ run.notes|linebreaksbr }}</p>
+                {% endif %}
                 {% if run.images.all %}
                 <div class="d-flex flex-wrap gap-2">
                     {% for img in run.images.all %}
