@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Create Checklist - Oakholm{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Create a Checklist</h3>
+
+<form method="post" class="col-md-6">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <div class="mb-3">
+        <label class="form-label" for="{{ form.name.id_for_label }}">Name</label>
+        {{ form.name }}
+        {% for error in form.name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+{% endblock %}

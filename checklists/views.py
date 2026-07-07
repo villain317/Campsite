@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from .forms import ChecklistForm
 from .models import Checklist, ChecklistImage, ChecklistItem, ChecklistRun, ChecklistRunItem
 
 
@@ -23,6 +24,19 @@ def _get_or_create_active_run(user, checklist):
         [ChecklistRunItem(run=run, item=item) for item in missing_items]
     )
     return run
+
+
+@login_required
+def create_checklist(request):
+    if request.method == "POST":
+        form = ChecklistForm(request.POST)
+        if form.is_valid():
+            checklist = form.save()
+            messages.success(request, f"Created '{checklist.name}'.")
+            return redirect("checklists:run", checklist_id=checklist.pk)
+    else:
+        form = ChecklistForm()
+    return render(request, "checklists/create.html", {"form": form})
 
 
 @login_required

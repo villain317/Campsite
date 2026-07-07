@@ -47,6 +47,10 @@
             border-radius: 3px;
             margin-right: 4px;
         }
+        .dropdown-item-form button.dropdown-item {
+            width: 100%;
+            text-align: left;
+        }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
@@ -81,6 +85,8 @@
                         Checklists
                     </a>
                     <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'checklists:create' %}">+ Create Checklist</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         {% for cl in nav_checklists %}
                         <li><a class="dropdown-item" href="{% url 'checklists:run' cl.pk %}">{{ cl.name }}</a></li>
                         {% empty %}
@@ -91,22 +97,28 @@
                     </ul>
                 </li>
                 {% endif %}
-                {% if user.is_superuser %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
-                </li>
-                {% endif %}
             </ul>
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <span class="navbar-text me-3">Hi, {{ user.first_name|default:user.username }}</span>
-                </li>
-                <li class="nav-item">
-                    <form method="post" action="{% url 'logout' %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-light btn-sm">Log out</button>
-                    </form>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Account
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><span class="dropdown-item-text text-muted">Hi, {{ user.first_name|default:user.username }}</span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a></li>
+                        {% if user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li class="dropdown-item-form px-3">
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item p-0 border-0 bg-transparent">Log out</button>
+                            </form>
+                        </li>
+                    </ul>
                 </li>
                 {% else %}
                 <li class="nav-item">
