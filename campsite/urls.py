@@ -2,10 +2,10 @@
 URL configuration for campsite project.
 """
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve as serve_static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -18,8 +18,12 @@ urlpatterns = [
     path("", include("reservations.urls")),
 ]
 
-if settings.DEBUG:
-    # Serve /media/ locally in dev. In production, media should be served by
-    # a real web server, whitenoise-style storage, or object storage (S3 etc.)
-    # rather than through Django.
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve /media/ (the banner image, etc.) through Django directly, in both dev
+# and production. Django's usual django.conf.urls.static.static() helper
+# silently no-ops when DEBUG=False, which is why this uses django.views.static
+# serve directly instead. For a low-traffic site like this, having Django
+# serve media is perfectly fine; if traffic/upload volume ever grows, this is
+# a good candidate to move to Caddy's file_server or object storage instead.
+urlpatterns += [
+    re_path(r"^media/(?P<path>.*)$", serve_static, {"document_root": settings.MEDIA_ROOT}),
+]
