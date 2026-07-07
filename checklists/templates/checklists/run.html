@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ checklist.name }} - Oakholm{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h3 class="mb-0">{{ checklist.name }}</h3>
+    <a href="{% url 'checklists:completed_list' %}" class="btn btn-sm btn-outline-secondary">View completed checklists</a>
+</div>
+<p class="text-muted">Started {{ run.started_at }}</p>
+
+<ul class="list-group mb-3">
+    {% for run_item in run_items %}
+    <li class="list-group-item d-flex align-items-center">
+        <input
+            type="checkbox"
+            class="form-check-input me-2 checklist-item-checkbox"
+            data-toggle-url="{% url 'checklists:toggle_item' run_item.pk %}"
+            {% if run_item.checked %}checked{% endif %}
+        >
+        <span class="checklist-item-label {% if run_item.checked %}text-decoration-line-through text-muted{% endif %}">
+            {{ run_item.item.name }}
+        </span>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">No items yet — add one below.</li>
+    {% endfor %}
+</ul>
+
+<form method="post" action="{% url 'checklists:add_item' run.pk %}" class="row g-2 mb-4">
+    {% csrf_token %}
+    <div class="col-auto">
+        <input type="text" name="name" class="form-control" placeholder="New item name" required>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-secondary">Add item</button>
+    </div>
+</form>
+
+<h5>Photos</h5>
+<div class="mb-2 d-flex flex-wrap gap-2">
+    {% for img in images %}
+        <a href="{{ img.image.url }}" target="_blank">
+            <img src="{{ img.image.url }}" class="rounded" style="width:100px;height:100px;object-fit:cover;" alt="Checklist photo">
+        </a>
+    {% empty %}
+        <p class="text-muted">No photos yet.</p>
+    {% endfor %}
+</div>
+<form method="post" action="{% url 'checklists:upload_image' run.pk %}" enctype="multipart/form-data" class="mb-4">
+    {% csrf_token %}
+    <input type="file" name="images" accept="image/*" multiple class="form-control mb-2">
+    <button type="submit" class="btn btn-outline-secondary">Upload photo(s)</button>
+</form>
+
+<form method="post" action="{% url 'checklists:complete_run' run.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success">Complete checklist</button>
+</form>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('.checklist-item-checkbox').forEach(function (checkbox) {
+    checkbox.addEventListener('change', function () {
+        var label = checkbox.nextElementSibling;
+        var wasChecked = checkbox.checked;
+        fetch(checkbox.dataset.toggleUrl, {
+            method: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        })
+            .then(function (resp) {
+                if (!resp.ok) { throw new Error('Request failed'); }
+                return resp.json();
+            })
+            .then(function (data) {
+                if (data.checked) {
+                    label.classList.add('text-decoration-line-through', 'text-muted');
+                } else {
+                    label.classList.remove('text-decoration-line-through', 'text-muted');
+                }
+            })
+            .catch(function () {
+                checkbox.checked = !wasChecked;
+                alert('Could not save that — please try again.');
+            });
+    });
+});
+</script>
+{% endblock %}

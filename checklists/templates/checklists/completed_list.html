@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Completed Checklists - Oakholm{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Completed Checklists</h3>
+
+<div class="row row-cols-1 row-cols-md-2 g-3">
+    {% for run in runs %}
+    <div class="col">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ run.checklist.name }}</h5>
+                <p class="card-text mb-1">
+                    <strong>Completed by:</strong> {{ run.user.get_full_name|default:run.user.username }}
+                </p>
+                <p class="card-text mb-2">
+                    <strong>Date:</strong> {{ run.completed_at }}
+                </p>
+                <ul class="list-group list-group-flush mb-2">
+                    {% for run_item in run.checked_items %}
+                        <li class="list-group-item">{{ run_item.item.name }}</li>
+                    {% empty %}
+                        <li class="list-group-item text-muted">No items checked off.</li>
+                    {% endfor %}
+                </ul>
+                {% if run.images.all %}
+                <div class="d-flex flex-wrap gap-2">
+                    {% for img in run.images.all %}
+                        <a href="{{ img.image.url }}" target="_blank">
+                            <img src="{{ img.image.url }}" style="width:60px;height:60px;object-fit:cover;" class="rounded" alt="Checklist photo">
+                        </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">No completed checklists yet.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

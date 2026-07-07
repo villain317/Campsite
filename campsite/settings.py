@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "reservations",
+    "checklists",
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "checklists.context_processors.nav_checklists",
             ],
         },
     },
@@ -150,12 +152,16 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
-# User/site-uploaded media (e.g. the banner image), separate from STATIC_*.
+# User/site-uploaded media (e.g. the banner image, checklist photos), separate
+# from STATIC_*.
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 

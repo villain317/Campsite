@@ -76,6 +76,20 @@
                     <a class="nav-link" href="{% url 'reservations:approve_list' %}">Approve Requests</a>
                 </li>
                 {% endif %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Checklists
+                    </a>
+                    <ul class="dropdown-menu">
+                        {% for cl in nav_checklists %}
+                        <li><a class="dropdown-item" href="{% url 'checklists:run' cl.pk %}">{{ cl.name }}</a></li>
+                        {% empty %}
+                        <li><span class="dropdown-item-text text-muted">No checklists yet</span></li>
+                        {% endfor %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'checklists:completed_list' %}">Completed Checklists</a></li>
+                    </ul>
+                </li>
                 {% endif %}
                 {% if user.is_superuser %}
                 <li class="nav-item">
