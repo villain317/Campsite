@@ -55,7 +55,7 @@
 <h5>Notes</h5>
 <form method="post" action="{% url 'checklists:update_notes' run.pk %}" class="mb-4" id="notes-form">
     {% csrf_token %}
-    <textarea name="notes" id="id_notes" class="form-control mb-2" rows="3" placeholder="Optional notes about this checklist run...">{{ run.notes }}</textarea>
+    <textarea name="notes" id="id_notes" class="form-control mb-2" rows="3" placeholder="Optional notes about this checklist...">{{ run.notes }}</textarea>
     <button type="submit" class="btn btn-outline-secondary">Save notes</button>
 </form>
 

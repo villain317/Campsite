@@ -23,10 +23,6 @@ def _archived_notes_queryset():
     ).prefetch_related("images")
 
 
-def _can_manage(user, note):
-    return user.is_superuser or note.author_id == user.id
-
-
 @login_required
 def notes_list_view(request):
     if request.method == "POST":
@@ -72,10 +68,19 @@ def note_edit_view(request, note_id):
 
 @login_required
 @require_POST
+def note_delete(request, note_id):
+    note = get_object_or_404(Note, pk=note_id, author=request.user)
+    note.delete()
+    messages.success(request, "Note deleted.")
+    return redirect("notes:list")
+
+
+@login_required
+@require_POST
 def note_archive(request, note_id):
     note = get_object_or_404(Note, pk=note_id)
-    if not _can_manage(request.user, note):
-        messages.error(request, "You can only archive your own notes.")
+    if not request.user.is_superuser:
+        messages.error(request, "Only an admin can archive notes.")
         return redirect("notes:list")
     note.is_archived = True
     note.archived_at = timezone.now()
@@ -88,8 +93,8 @@ def note_archive(request, note_id):
 @require_POST
 def note_unarchive(request, note_id):
     note = get_object_or_404(Note, pk=note_id)
-    if not _can_manage(request.user, note):
-        messages.error(request, "You can only unarchive your own notes.")
+    if not request.user.is_superuser:
+        messages.error(request, "Only an admin can unarchive notes.")
         return redirect("notes:archived")
     note.is_archived = False
     note.archived_at = None

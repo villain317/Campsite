@@ -28,7 +28,7 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if note.author_id == user.id or user.is_superuser %}
+            {% if user.is_superuser %}
             <form method="post" action="{% url 'notes:unarchive' note.pk %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-sm btn-outline-secondary">Unarchive</button>

@@ -49,11 +49,18 @@
             <div class="d-flex gap-2">
                 {% if note.author_id == user.id %}
                 <a href="{% url 'notes:edit' note.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <form method="post" action="{% url 'notes:delete' note.pk %}"
+                      onsubmit="return confirm('Delete this note? This cannot be undone.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
                 {% endif %}
+                {% if user.is_superuser %}
                 <form method="post" action="{% url 'notes:archive' note.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-danger">Archive</button>
                 </form>
+                {% endif %}
             </div>
             {% endif %}
         </div>
