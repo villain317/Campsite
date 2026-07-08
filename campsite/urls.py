@@ -66,6 +66,8 @@ urlpatterns = [
     ),
     path("checklists/", include("checklists.urls")),
     path("notes/", include("notes.urls")),
+    path("feedback/", include("feedback.urls")),
+    path("accounts/", include("accounts.urls")),
     path("", include("reservations.urls")),
 ]
 

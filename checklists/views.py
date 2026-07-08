@@ -121,7 +121,7 @@ def completed_list_view(request):
     checked_items_qs = ChecklistRunItem.objects.filter(checked=True).select_related("item")
     runs = (
         ChecklistRun.objects.filter(status=ChecklistRun.STATUS_COMPLETED)
-        .select_related("checklist", "user")
+        .select_related("checklist", "user", "user__profile")
         .prefetch_related(
             Prefetch("run_items", queryset=checked_items_qs, to_attr="checked_items"),
             "images",

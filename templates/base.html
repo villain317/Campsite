@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Oakholm{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .lake-banner {
@@ -24,6 +29,13 @@
         .lake-banner h1 {
             font-weight: 700;
             margin-bottom: 0;
+        }
+        .banner-acorn {
+            height: 1em;
+            width: auto;
+            vertical-align: -0.1em;
+            margin-right: 0.2em;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
         }
         .day-cell {
             min-height: 110px;
@@ -51,19 +63,32 @@
             width: 100%;
             text-align: left;
         }
-        .note-card {
-            border: none;
-            border-left: 4px solid #6c757d;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        .note-card,
+        .completed-checklist-card {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             transition: box-shadow 0.15s ease-in-out;
+            overflow: hidden;
         }
-        .note-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        .note-card:hover,
+        .completed-checklist-card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+        .note-card {
+            border-left: 4px solid #6c757d;
         }
         .note-card-archived {
             border-left-color: #adb5bd;
             opacity: 0.85;
+        }
+        .note-card-header,
+        .completed-checklist-header {
+            background-color: #eef6fb;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .note-card-archived .note-card-header {
+            background-color: #f1f3f5;
         }
         .note-avatar {
             width: 36px;
@@ -86,7 +111,7 @@
 <body>
 
 <div class="lake-banner">
-    <h1>🌰 Oakholm</h1>
+    <h1><img src="{% static 'images/acorn.svg' %}" alt="" class="banner-acorn">Oakholm</h1>
 </div>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -132,6 +157,21 @@
             </ul>
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Feedback
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'feedback:create' %}">Give Feedback</a></li>
+                        <li><a class="dropdown-item" href="{% url 'feedback:list' %}">View Feedback</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'feedback:create' %}">Feedback</a>
+                </li>
+                {% endif %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Account
@@ -139,6 +179,7 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><span class="dropdown-item-text text-muted">Hi, {{ user.first_name|default:user.username }}</span></li>
                         <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
                         <li><a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a></li>
                         {% if user.is_superuser %}
                         <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>

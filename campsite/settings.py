@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     "reservations",
     "checklists",
     "notes",
+    "feedback",
+    "accounts",
 ]
 
 MIDDLEWARE = [

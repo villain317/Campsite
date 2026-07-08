@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Profile - Oakholm{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h3 class="mb-3">Profile</h3>
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="profile-form">
+                    {% csrf_token %}
+
+                    <div class="text-center mb-3">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" class="rounded-circle mb-2" style="width:100px;height:100px;object-fit:cover;" alt="Profile photo">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-2" style="width:100px;height:100px;font-size:2rem;">
+                                {{ user.first_name|default:user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            {{ avatar_form.avatar }}
+                            {% for error in avatar_form.avatar.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ user_form.username.id_for_label }}">Username</label>
+                        {{ user_form.username }}
+                        {% for error in user_form.username.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ user_form.first_name.id_for_label }}">First name</label>
+                        {{ user_form.first_name }}
+                        {% for error in user_form.first_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ user_form.last_name.id_for_label }}">Last name</label>
+                        {{ user_form.last_name }}
+                        {% for error in user_form.last_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ user_form.email.id_for_label }}">Email</label>
+                        {{ user_form.email }}
+                        {% for error in user_form.email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="profile-submit-btn">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var profileForm = document.getElementById('profile-form');
+if (profileForm) {
+    profileForm.addEventListener('submit', function () {
+        var btn = document.getElementById('profile-submit-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+        }
+    });
+}
+</script>
+{% endblock %}

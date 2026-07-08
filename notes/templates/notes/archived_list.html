@@ -10,14 +10,14 @@
 <div class="d-flex flex-column gap-3">
     {% for note in notes %}
     <div class="card note-card note-card-archived">
-        <div class="card-body">
-            <div class="d-flex align-items-start gap-2 mb-2">
-                <div class="note-avatar">{{ note.author.first_name|default:note.author.username|first|upper }}</div>
-                <div>
-                    <div class="fw-semibold">{{ note.author.get_full_name|default:note.author.username }}</div>
-                    <div class="text-muted small">{{ note.created_at }}</div>
-                </div>
+        <div class="card-header note-card-header d-flex align-items-center gap-2">
+            <div class="note-avatar">{{ note.author.first_name|default:note.author.username|first|upper }}</div>
+            <div>
+                <div class="fw-semibold">{{ note.author.get_full_name|default:note.author.username }}</div>
+                <div class="text-muted small">{{ note.created_at }}</div>
             </div>
+        </div>
+        <div class="card-body">
             <p class="note-body mb-2">{{ note.body }}</p>
             {% if note.images.all %}
             <div class="d-flex flex-wrap gap-2 mb-2">
