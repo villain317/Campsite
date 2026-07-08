@@ -1,0 +1,11 @@
+Hi {{ user.first_name }},
+
+An account has been created for you on the Oakholm site (oakholm.duckdns.org).
+
+Your username is: {{ user.username }}
+
+To set your password and log in, go to the following page:
+
+{{ reset_url }}
+
+If you have any trouble, reach out to whoever set up your account for you.

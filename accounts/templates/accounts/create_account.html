@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Create Account - Oakholm{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h3 class="mb-3">Create Account</h3>
+        <div class="card">
+            <div class="card-body">
+                <form method="post" id="create-account-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.person.id_for_label }}">Person</label>
+                        {{ form.person }}
+                        {% if form.person.help_text %}<div class="form-text">{{ form.person.help_text }}</div>{% endif %}
+                        {% for error in form.person.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+                        {{ form.email }}
+                        {% for error in form.email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="form-check mb-3">
+                        {{ form.is_approver }}
+                        <label class="form-check-label" for="{{ form.is_approver.id_for_label }}">
+                            Add to Approvers group (can approve/deny requests)
+                        </label>
+                    </div>
+                    <p class="text-muted small">
+                        A username is generated automatically from the person's first name (their first
+                        initial of their last name gets added if that name is already taken). No password
+                        is set here &mdash; they'll get an email with a link to set their own password.
+                    </p>
+                    <button type="submit" class="btn btn-primary" id="create-account-submit-btn">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var createAccountForm = document.getElementById('create-account-form');
+if (createAccountForm) {
+    createAccountForm.addEventListener('submit', function () {
+        var btn = document.getElementById('create-account-submit-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+        }
+    });
+}
+</script>
+{% endblock %}
