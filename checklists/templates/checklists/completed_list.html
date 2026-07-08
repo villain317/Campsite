@@ -35,6 +35,13 @@
                     {% endfor %}
                 </div>
                 {% endif %}
+                {% if request.user.is_superuser %}
+                <form method="post" action="{% url 'checklists:delete_run' run.pk %}" class="mt-2"
+                      onsubmit="return confirm('Delete this completed checklist run? This cannot be undone.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>

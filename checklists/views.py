@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -129,3 +129,14 @@ def completed_list_view(request):
         .order_by("-completed_at")
     )
     return render(request, "checklists/completed_list.html", {"runs": runs})
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def delete_run(request, run_id):
+    run = get_object_or_404(ChecklistRun, pk=run_id, status=ChecklistRun.STATUS_COMPLETED)
+    checklist_name = run.checklist.name
+    run.delete()
+    messages.success(request, f"Deleted completed run of '{checklist_name}'.")
+    return redirect("checklists:completed_list")

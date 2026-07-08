@@ -46,20 +46,20 @@
         <p class="text-muted">No photos yet.</p>
     {% endfor %}
 </div>
-<form method="post" action="{% url 'checklists:upload_image' run.pk %}" enctype="multipart/form-data" class="mb-4">
+<form method="post" action="{% url 'checklists:upload_image' run.pk %}" enctype="multipart/form-data" class="mb-4" id="upload-form">
     {% csrf_token %}
-    <input type="file" name="images" accept="image/*" multiple class="form-control mb-2">
+    <input type="file" name="images" id="id_images" accept="image/*" multiple class="form-control mb-2">
     <button type="submit" class="btn btn-outline-secondary">Upload photo(s)</button>
 </form>
 
 <h5>Notes</h5>
-<form method="post" action="{% url 'checklists:update_notes' run.pk %}" class="mb-4">
+<form method="post" action="{% url 'checklists:update_notes' run.pk %}" class="mb-4" id="notes-form">
     {% csrf_token %}
-    <textarea name="notes" class="form-control mb-2" rows="3" placeholder="Optional notes about this checklist run...">{{ run.notes }}</textarea>
+    <textarea name="notes" id="id_notes" class="form-control mb-2" rows="3" placeholder="Optional notes about this checklist run...">{{ run.notes }}</textarea>
     <button type="submit" class="btn btn-outline-secondary">Save notes</button>
 </form>
 
-<form method="post" action="{% url 'checklists:complete_run' run.pk %}">
+<form method="post" action="{% url 'checklists:complete_run' run.pk %}" id="complete-form">
     {% csrf_token %}
     <button type="submit" class="btn btn-success">Complete checklist</button>
 </form>
@@ -93,5 +93,51 @@ document.querySelectorAll('.checklist-item-checkbox').forEach(function (checkbox
             });
     });
 });
+
+var completeForm = document.getElementById('complete-form');
+if (completeForm) {
+    completeForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var submitBtn = completeForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Completing...';
+
+        var tasks = [];
+
+        var imagesInput = document.getElementById('id_images');
+        if (imagesInput && imagesInput.files && imagesInput.files.length > 0) {
+            var imgData = new FormData();
+            for (var i = 0; i < imagesInput.files.length; i++) {
+                imgData.append('images', imagesInput.files[i]);
+            }
+            tasks.push(fetch(document.getElementById('upload-form').action, {
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                body: imgData,
+            }));
+        }
+
+        var notesTextarea = document.getElementById('id_notes');
+        if (notesTextarea && notesTextarea.value.trim().length > 0) {
+            var notesData = new FormData();
+            notesData.append('notes', notesTextarea.value);
+            tasks.push(fetch(document.getElementById('notes-form').action, {
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                body: notesData,
+            }));
+        }
+
+        Promise.all(tasks)
+            .then(function () {
+                completeForm.submit();
+            })
+            .catch(function () {
+                alert('Could not save photos/notes before completing — please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Complete checklist';
+            });
+    });
+}
 </script>
 {% endblock %}

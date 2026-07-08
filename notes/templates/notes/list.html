@@ -9,14 +9,14 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="note-form">
             {% csrf_token %}
             {{ form.body }}
             {% for error in form.body.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
             <div class="mt-2">
                 <input type="file" name="images" accept="image/*" multiple class="form-control">
             </div>
-            <button type="submit" class="btn btn-primary mt-2">Post note</button>
+            <button type="submit" class="btn btn-primary mt-2" id="note-submit-btn">Post note</button>
         </form>
     </div>
 </div>
@@ -63,4 +63,19 @@
     {% endfor %}
 </div>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var noteForm = document.getElementById('note-form');
+if (noteForm) {
+    noteForm.addEventListener('submit', function () {
+        var btn = document.getElementById('note-submit-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Posting...';
+        }
+    });
+}
+</script>
 {% endblock %}

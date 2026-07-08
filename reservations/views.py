@@ -51,19 +51,37 @@ def calendar_view(request):
         ).prefetch_related("people", "people__family", "requested_by")
     )
 
-    # Precompute display info for each request once.
+    # Precompute display info for each request once. A request can include
+    # attendees from multiple families (e.g. a joint visit), so we build one
+    # calendar event per family represented among the attendees - each one
+    # showing just that family's attendees and colored with that family's
+    # color - even though it's still a single underlying request/approval.
     request_info = []
     for r in relevant_requests:
-        family = r.family
-        attendee_names = ", ".join(p.full_name for p in r.people.all())
-        request_info.append(
-            {
-                "request": r,
-                "family": family,
-                "color": family.color if (family and r.status == ReservationRequest.STATUS_APPROVED) else "#adb5bd",
-                "attendee_names": attendee_names,
+        family_groups = {}
+        for p in r.people.all():
+            family_groups.setdefault(p.family_id, {"family": p.family, "members": []})
+            family_groups[p.family_id]["members"].append(p)
+
+        if not family_groups:
+            # No attendees recorded - fall back to a single ungrouped event.
+            fallback_family = r.family
+            family_groups[getattr(fallback_family, "pk", None)] = {
+                "family": fallback_family,
+                "members": [],
             }
-        )
+
+        for group in family_groups.values():
+            family = group["family"]
+            attendee_names = ", ".join(p.full_name for p in group["members"])
+            request_info.append(
+                {
+                    "request": r,
+                    "family": family,
+                    "color": family.color if (family and r.status == ReservationRequest.STATUS_APPROVED) else "#adb5bd",
+                    "attendee_names": attendee_names,
+                }
+            )
 
     months = []
     for y, m, month_dates in month_grids:

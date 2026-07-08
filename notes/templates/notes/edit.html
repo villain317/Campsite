@@ -4,7 +4,7 @@
 
 <h3 class="mb-3">Edit Note</h3>
 
-<form method="post" enctype="multipart/form-data" class="col-md-8">
+<form method="post" enctype="multipart/form-data" class="col-md-8" id="note-edit-form">
     {% csrf_token %}
     {{ form.body }}
     {% for error in form.body.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
@@ -24,8 +24,23 @@
         <input type="file" name="images" accept="image/*" multiple class="form-control">
     </div>
 
-    <button type="submit" class="btn btn-primary mt-3">Save changes</button>
+    <button type="submit" class="btn btn-primary mt-3" id="note-edit-submit-btn">Save changes</button>
     <a href="{% url 'notes:list' %}" class="btn btn-outline-secondary mt-3">Cancel</a>
 </form>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+var noteEditForm = document.getElementById('note-edit-form');
+if (noteEditForm) {
+    noteEditForm.addEventListener('submit', function () {
+        var btn = document.getElementById('note-edit-submit-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+        }
+    });
+}
+</script>
 {% endblock %}
