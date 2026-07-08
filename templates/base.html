@@ -182,6 +182,7 @@
                         <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
                         <li><a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a></li>
                         {% if user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'accounts:create_account' %}">Create Account</a></li>
                         <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
                         {% endif %}
                         <li><hr class="dropdown-divider"></li>

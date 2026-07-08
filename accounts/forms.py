@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
+from reservations.models import Person
+
 from .models import Profile
 
 User = get_user_model()
@@ -26,3 +28,25 @@ class ProfileAvatarForm(forms.ModelForm):
         widgets = {
             "avatar": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
+
+
+class CreateAccountForm(forms.Form):
+    person = forms.ModelChoiceField(
+        queryset=Person.objects.none(),
+        widget=forms.Select(attrs={"class": "form-select"}),
+        help_text="Only people who don't already have a login are listed.",
+    )
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"class": "form-control"}))
+    is_approver = forms.BooleanField(
+        required=False,
+        label="Add to Approvers group (can approve/deny requests)",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["person"].queryset = (
+            Person.objects.filter(user__isnull=True)
+            .select_related("family")
+            .order_by("family__name", "last_name", "first_name")
+        )

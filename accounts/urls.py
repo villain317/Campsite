@@ -6,4 +6,5 @@ app_name = "accounts"
 
 urlpatterns = [
     path("profile/", views.profile_view, name="profile"),
+    path("create-account/", views.create_account_view, name="create_account"),
 ]
