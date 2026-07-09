@@ -146,6 +146,43 @@ def request_create(request):
 
 
 @login_required
+def my_requests_view(request):
+    requests = (
+        ReservationRequest.objects.filter(requested_by=request.user)
+        .prefetch_related("people", "people__family")
+        .order_by("-requested_at")
+    )
+    return render(request, "reservations/my_requests.html", {"requests": requests})
+
+
+@login_required
+def request_edit_view(request, pk):
+    reservation_request = get_object_or_404(ReservationRequest, pk=pk)
+    is_owner = reservation_request.requested_by_id == request.user.id
+    if not is_owner and not is_approver(request.user):
+        messages.error(request, "You don't have permission to edit that request.")
+        return redirect("reservations:calendar")
+
+    default_next = "reservations:my_requests" if is_owner else "reservations:approve_list"
+    next_url = request.POST.get("next") or request.GET.get("next") or default_next
+
+    if request.method == "POST":
+        form = ReservationRequestForm(request.POST, instance=reservation_request)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Request updated.")
+            return redirect(next_url)
+    else:
+        form = ReservationRequestForm(instance=reservation_request)
+
+    return render(
+        request,
+        "reservations/request_form.html",
+        {"form": form, "editing": True, "next_url": next_url},
+    )
+
+
+@login_required
 @user_passes_test(is_approver)
 def approve_list(request):
     pending_requests = (

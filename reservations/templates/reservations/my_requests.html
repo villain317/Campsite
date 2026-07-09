@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Your Requests - Oakholm{% endblock %}
+{% block content %}
+
+<h3 class="mb-3">Your Requests</h3>
+
+<div class="d-flex flex-column gap-3">
+    {% for r in requests %}
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">{{ r.start_date }} &ndash; {{ r.end_date }}</h5>
+                <span class="badge {% if r.status == 'approved' %}bg-success{% elif r.status == 'denied' %}bg-danger{% else %}bg-secondary{% endif %}">
+                    {{ r.get_status_display }}
+                </span>
+            </div>
+            <p class="card-text mb-1">
+                <strong>Estimated occupants:</strong> {{ r.estimated_occupants }}
+            </p>
+            <p class="card-text mb-2">
+                <strong>Attendees:</strong>
+                {% for person in r.people.all %}{{ person.full_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </p>
+            <p class="card-text text-muted small mb-2">Requested on {{ r.requested_at }}</p>
+            <a href="{% url 'reservations:request_edit' r.pk %}?next={% url 'reservations:my_requests' %}"
+               class="btn btn-sm btn-outline-secondary">Edit</a>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">You haven't made any requests yet.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

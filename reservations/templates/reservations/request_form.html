@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block title %}New Request - Oakholm{% endblock %}
+{% block title %}{% if editing %}Edit Request{% else %}New Request{% endif %} - Oakholm{% endblock %}
 {% block content %}
 
-<h3 class="mb-3">Request Oakholm</h3>
+<h3 class="mb-3">{% if editing %}Edit Request{% else %}Request Oakholm{% endif %}</h3>
 
 <form method="post" class="col-md-8">
     {% csrf_token %}
+    {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
 
     {% if form.non_field_errors %}
         <div class="alert alert-danger">{{ form.non_field_errors }}</div>
@@ -37,7 +38,7 @@
         {% for error in form.estimated_occupants.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
     </div>
 
-    <button type="submit" class="btn btn-primary">Submit request</button>
+    <button type="submit" class="btn btn-primary">{% if editing %}Save Changes{% else %}Submit request{% endif %}</button>
 </form>
 
 {% endblock %}

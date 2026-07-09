@@ -126,14 +126,19 @@
                     <a class="nav-link" href="{% url 'reservations:calendar' %}">Calendar</a>
                 </li>
                 {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'reservations:request_create' %}">New Request</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Requests
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'reservations:request_create' %}">Submit Request</a></li>
+                        <li><a class="dropdown-item" href="{% url 'reservations:my_requests' %}">Your Requests</a></li>
+                        {% if user|is_approver %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'reservations:approve_list' %}">Approve Requests</a></li>
+                        {% endif %}
+                    </ul>
                 </li>
-                {% if user|is_approver %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'reservations:approve_list' %}">Approve Requests</a>
-                </li>
-                {% endif %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Checklists

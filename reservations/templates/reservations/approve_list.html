@@ -42,6 +42,8 @@
                 {% endif %}
 
                 <div class="d-flex gap-2 mt-2">
+                    <a href="{% url 'reservations:request_edit' card.request.pk %}?next={% url 'reservations:approve_list' %}"
+                       class="btn btn-outline-secondary btn-sm">Edit</a>
                     <form method="post" action="{% url 'reservations:approve_action' card.request.pk 'approve' %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-success btn-sm">Approve</button>

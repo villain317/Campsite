@@ -33,7 +33,7 @@ class ReservationRequestForm(forms.ModelForm):
             for family_name, members in groupby(people_qs, key=lambda p: p.family.name)
         ]
 
-        if self.requester_person and not self.is_bound:
+        if self.requester_person and not self.is_bound and not self.instance.pk:
             self.fields["people"].initial = [self.requester_person.pk]
 
     def clean(self):
