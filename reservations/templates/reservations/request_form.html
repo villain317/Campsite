@@ -2,6 +2,16 @@
 {% block title %}{% if editing %}Edit Request{% else %}New Request{% endif %} - Oakholm{% endblock %}
 {% block content %}
 
+<style>
+    .household-row {
+        background-color: #e7f1ff;
+        border-radius: 0.25rem;
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        padding-right: 0.5rem;
+    }
+</style>
+
 <h3 class="mb-3">{% if editing %}Edit Request{% else %}Request Oakholm{% endif %}</h3>
 
 <form method="post" class="col-md-8">
@@ -26,9 +36,50 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label" for="{{ form.people.id_for_label }}">Who's coming?</label>
-        {{ form.people }}
-        <div class="form-text">Hold Ctrl/Cmd to select multiple people. You're included by default.</div>
+        <label class="form-label">Who's coming?</label>
+        <div class="form-text mb-2">Check a household's box to select everyone in it, or toggle people one at a time.</div>
+
+        {% for entry in family_data %}
+        <div class="card mb-2">
+            <div class="card-header" style="border-left: 5px solid {{ entry.family.color|default:'#6c757d' }};">
+                {{ entry.family.name }}
+            </div>
+            <div class="card-body py-2">
+                {% for household in entry.households %}
+                <div class="household-card border rounded p-2 mb-2">
+                    <div class="form-check fw-semibold mb-1 household-row">
+                        <input type="checkbox" class="form-check-input household-toggle" id="household-{{ household.pk }}">
+                        <label class="form-check-label" for="household-{{ household.pk }}">{{ household.name }}</label>
+                    </div>
+                    {% for person in household.members.all %}
+                    <div class="form-check ms-4">
+                        <input type="checkbox" class="form-check-input person-checkbox" name="people"
+                               value="{{ person.pk }}" id="person-{{ person.pk }}"
+                               {% if person.pk in selected_ids %}checked{% endif %}>
+                        <label class="form-check-label" for="person-{{ person.pk }}">{{ person.full_name }}</label>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small mb-0 ms-4">No one in this household yet.</p>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+
+                {% for person in entry.ungrouped %}
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input person-checkbox" name="people"
+                           value="{{ person.pk }}" id="person-{{ person.pk }}"
+                           {% if person.pk in selected_ids %}checked{% endif %}>
+                    <label class="form-check-label" for="person-{{ person.pk }}">{{ person.full_name }}</label>
+                </div>
+                {% endfor %}
+
+                {% if not entry.households and not entry.ungrouped %}
+                <p class="text-muted small mb-0">No one in this family yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+
         {% for error in form.people.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
     </div>
 
@@ -40,5 +91,40 @@
 
     <button type="submit" class="btn btn-primary">{% if editing %}Save Changes{% else %}Submit request{% endif %}</button>
 </form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".household-toggle").forEach(function (toggle) {
+        var card = toggle.closest(".household-card");
+        var memberCheckboxes = card.querySelectorAll(".person-checkbox");
+
+        function syncToggleFromMembers() {
+            var checkedCount = 0;
+            memberCheckboxes.forEach(function (cb) { if (cb.checked) checkedCount++; });
+            if (checkedCount === 0) {
+                toggle.checked = false;
+                toggle.indeterminate = false;
+            } else if (checkedCount === memberCheckboxes.length) {
+                toggle.checked = true;
+                toggle.indeterminate = false;
+            } else {
+                toggle.checked = false;
+                toggle.indeterminate = true;
+            }
+        }
+
+        toggle.addEventListener("change", function () {
+            memberCheckboxes.forEach(function (cb) { cb.checked = toggle.checked; });
+            toggle.indeterminate = false;
+        });
+
+        memberCheckboxes.forEach(function (cb) {
+            cb.addEventListener("change", syncToggleFromMembers);
+        });
+
+        syncToggleFromMembers();
+    });
+});
+</script>
 
 {% endblock %}

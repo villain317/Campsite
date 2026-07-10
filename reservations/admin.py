@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Family, Person, ReservationRequest
+from .models import Family, Household, Person, ReservationRequest
 
 
 class FamilyAdminForm(forms.ModelForm):
@@ -33,9 +33,28 @@ class FamilyAdmin(admin.ModelAdmin):
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ("first_name", "last_name", "family", "user")
-    list_filter = ("family",)
+    list_display = ("first_name", "last_name", "family", "household", "user")
+    list_filter = ("family", "household")
     search_fields = ("first_name", "last_name")
+
+
+class PersonInline(admin.TabularInline):
+    model = Person
+    fields = ("first_name", "last_name", "user")
+    extra = 0
+    show_change_link = True
+
+
+@admin.register(Household)
+class HouseholdAdmin(admin.ModelAdmin):
+    list_display = ("name", "family", "member_count")
+    list_filter = ("family",)
+    search_fields = ("name",)
+    inlines = [PersonInline]
+
+    @admin.display(description="Members")
+    def member_count(self, obj):
+        return obj.members.count()
 
 
 @admin.register(ReservationRequest)

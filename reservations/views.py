@@ -7,10 +7,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .emails import notify_family_head_of_request
+from .emails import notify_approvers_of_request
 from .forms import ReservationRequestForm
 from .models import ReservationRequest
-from .utils import is_approver
+from .utils import build_people_picker_context, is_approver
 
 MONTH_NAMES = [
     "", "January", "February", "March", "April", "May", "June",
@@ -136,13 +136,15 @@ def request_create(request):
             reservation_request.requested_by = request.user
             reservation_request.save()
             form.save_m2m()
-            notify_family_head_of_request(request, reservation_request)
+            notify_approvers_of_request(request, reservation_request)
             messages.success(request, "Your request has been submitted.")
             return redirect("reservations:calendar")
     else:
         form = ReservationRequestForm(user=request.user)
 
-    return render(request, "reservations/request_form.html", {"form": form})
+    context = {"form": form}
+    context.update(build_people_picker_context(form))
+    return render(request, "reservations/request_form.html", context)
 
 
 @login_required
@@ -175,11 +177,9 @@ def request_edit_view(request, pk):
     else:
         form = ReservationRequestForm(instance=reservation_request)
 
-    return render(
-        request,
-        "reservations/request_form.html",
-        {"form": form, "editing": True, "next_url": next_url},
-    )
+    context = {"form": form, "editing": True, "next_url": next_url}
+    context.update(build_people_picker_context(form))
+    return render(request, "reservations/request_form.html", context)
 
 
 @login_required

@@ -30,6 +30,15 @@ class ProfileAvatarForm(forms.ModelForm):
         }
 
 
+class ProfileNotificationForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ["notification_preference"]
+        widgets = {
+            "notification_preference": forms.RadioSelect,
+        }
+
+
 class CreateAccountForm(forms.Form):
     person = forms.ModelChoiceField(
         queryset=Person.objects.none(),

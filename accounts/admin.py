@@ -5,5 +5,6 @@ from .models import Profile
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ("user",)
+    list_display = ("user", "notification_preference")
+    list_filter = ("notification_preference",)
     search_fields = ("user__username", "user__first_name", "user__last_name", "user__email")

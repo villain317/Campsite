@@ -45,6 +45,18 @@
                         {% for error in user_form.email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Request notifications</label>
+                        <div class="form-text mb-1">Only relevant if you're an approver.</div>
+                        {% for radio in notification_form.notification_preference %}
+                        <div class="form-check">
+                            {{ radio.tag }}
+                            <label class="form-check-label" for="{{ radio.id_for_label }}">{{ radio.choice_label }}</label>
+                        </div>
+                        {% endfor %}
+                        {% for error in notification_form.notification_preference.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                    </div>
+
                     <button type="submit" class="btn btn-primary" id="profile-submit-btn">Save Changes</button>
                 </form>
             </div>

@@ -13,7 +13,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.text import slugify
 
-from .forms import CreateAccountForm, ProfileAvatarForm, ProfileUserForm
+from .forms import CreateAccountForm, ProfileAvatarForm, ProfileNotificationForm, ProfileUserForm
 from .models import Profile
 
 User = get_user_model()
@@ -26,19 +26,27 @@ def profile_view(request):
     if request.method == "POST":
         user_form = ProfileUserForm(request.POST, instance=request.user)
         avatar_form = ProfileAvatarForm(request.POST, request.FILES, instance=profile)
-        if user_form.is_valid() and avatar_form.is_valid():
+        notification_form = ProfileNotificationForm(request.POST, instance=profile)
+        if user_form.is_valid() and avatar_form.is_valid() and notification_form.is_valid():
             user_form.save()
             avatar_form.save()
+            notification_form.save()
             messages.success(request, "Profile updated.")
             return redirect("accounts:profile")
     else:
         user_form = ProfileUserForm(instance=request.user)
         avatar_form = ProfileAvatarForm(instance=profile)
+        notification_form = ProfileNotificationForm(instance=profile)
 
     return render(
         request,
         "accounts/profile.html",
-        {"user_form": user_form, "avatar_form": avatar_form, "profile": profile},
+        {
+            "user_form": user_form,
+            "avatar_form": avatar_form,
+            "notification_form": notification_form,
+            "profile": profile,
+        },
     )
 
 

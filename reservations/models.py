@@ -34,12 +34,33 @@ class Family(models.Model):
         return self.name
 
 
+class Household(models.Model):
+    """A group of people within a family who usually attend together."""
+
+    family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="households")
+    name = models.CharField(max_length=100, help_text="e.g. 'Mike & Sarah' or 'Grandma & Grandpa'")
+
+    class Meta:
+        ordering = ["family__name", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.family.name})"
+
+
 class Person(models.Model):
     """A member of one of the families. May or may not have a login account."""
 
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     family = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="members")
+    household = models.ForeignKey(
+        Household,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="members",
+        help_text="Optional: the household this person belongs to, for grouping on the request form.",
+    )
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -59,6 +80,10 @@ class Person(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+    def clean(self):
+        if self.household_id and self.household.family_id != self.family_id:
+            raise ValidationError("Household must belong to the same family as this person.")
 
 
 class ReservationRequest(models.Model):

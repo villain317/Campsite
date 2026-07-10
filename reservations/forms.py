@@ -1,5 +1,3 @@
-from itertools import groupby
-
 from django import forms
 
 from .models import Person, ReservationRequest
@@ -13,7 +11,7 @@ class ReservationRequestForm(forms.ModelForm):
         model = ReservationRequest
         fields = ["start_date", "end_date", "people", "estimated_occupants"]
         widgets = {
-            "people": forms.SelectMultiple(attrs={"class": "form-select", "size": 12}),
+            "people": forms.CheckboxSelectMultiple,
             "estimated_occupants": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
         }
 
@@ -22,16 +20,12 @@ class ReservationRequestForm(forms.ModelForm):
         self.user = user
         self.requester_person = Person.objects.filter(user=user).first() if user else None
 
-        # Show everyone, from every family, grouped by family so you can put
-        # together a request that spans multiple families (e.g. a joint visit).
-        people_qs = Person.objects.select_related("family").order_by(
+        # Show everyone, from every family - the "Who's coming?" section of
+        # the template renders these grouped by family/household itself, so
+        # this queryset just needs to be complete and valid for validation.
+        self.fields["people"].queryset = Person.objects.select_related("family", "household").order_by(
             "family__name", "last_name", "first_name"
         )
-        self.fields["people"].queryset = people_qs
-        self.fields["people"].choices = [
-            (family_name, [(p.pk, p.full_name) for p in members])
-            for family_name, members in groupby(people_qs, key=lambda p: p.family.name)
-        ]
 
         if self.requester_person and not self.is_bound and not self.instance.pk:
             self.fields["people"].initial = [self.requester_person.pk]
