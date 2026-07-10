@@ -25,6 +25,9 @@ def _archived_notes_queryset():
 
 @login_required
 def notes_list_view(request):
+    category_filter = request.GET.get("category", "")
+    valid_categories = {choice for choice, _ in Note.CATEGORY_CHOICES}
+
     if request.method == "POST":
         form = NoteForm(request.POST)
         if form.is_valid():
@@ -36,10 +39,20 @@ def notes_list_view(request):
             messages.success(request, "Note added.")
             return redirect("notes:list")
     else:
-        form = NoteForm()
+        initial = {}
+        if category_filter in valid_categories:
+            initial["category"] = category_filter
+        form = NoteForm(initial=initial)
 
     notes = _active_notes_queryset()
-    return render(request, "notes/list.html", {"form": form, "notes": notes})
+    if category_filter in valid_categories:
+        notes = notes.filter(category=category_filter)
+
+    return render(
+        request,
+        "notes/list.html",
+        {"form": form, "notes": notes, "category_filter": category_filter},
+    )
 
 
 @login_required
@@ -101,3 +114,27 @@ def note_unarchive(request, note_id):
     note.save()
     messages.success(request, "Note restored.")
     return redirect("notes:archived")
+
+
+@login_required
+@require_POST
+def note_claim(request, note_id):
+    note = get_object_or_404(Note, pk=note_id, category=Note.CATEGORY_LOST_AND_FOUND)
+    note.is_claimed = True
+    note.claimed_at = timezone.now()
+    note.claimed_by = request.user
+    note.save()
+    messages.success(request, "Marked as claimed.")
+    return redirect("notes:list")
+
+
+@login_required
+@require_POST
+def note_unclaim(request, note_id):
+    note = get_object_or_404(Note, pk=note_id, category=Note.CATEGORY_LOST_AND_FOUND)
+    note.is_claimed = False
+    note.claimed_at = None
+    note.claimed_by = None
+    note.save()
+    messages.success(request, "Marked as unclaimed.")
+    return redirect("notes:list")

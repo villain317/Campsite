@@ -11,7 +11,7 @@ class NoteImageInline(admin.TabularInline):
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
-    list_display = ("author", "created_at", "is_archived", "is_effectively_archived")
-    list_filter = ("is_archived",)
+    list_display = ("author", "category", "created_at", "is_archived", "is_claimed", "is_effectively_archived")
+    list_filter = ("category", "is_archived", "is_claimed")
     search_fields = ("body", "author__username")
     inlines = [NoteImageInline]

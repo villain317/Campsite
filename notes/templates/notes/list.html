@@ -7,12 +7,28 @@
     <a href="{% url 'notes:archived' %}" class="btn btn-sm btn-outline-secondary">View archived notes</a>
 </div>
 
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+        <a class="nav-link {% if not category_filter %}active{% endif %}" href="{% url 'notes:list' %}">All</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if category_filter == 'general' %}active{% endif %}" href="?category=general">General</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if category_filter == 'lost_and_found' %}active{% endif %}" href="?category=lost_and_found">Lost &amp; Found</a>
+    </li>
+</ul>
+
 <div class="card mb-4">
     <div class="card-body">
         <form method="post" enctype="multipart/form-data" id="note-form">
             {% csrf_token %}
             {{ form.body }}
             {% for error in form.body.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            <div class="mt-2" style="max-width: 220px;">
+                <label class="form-label small text-muted mb-1" for="{{ form.category.id_for_label }}">Category</label>
+                {{ form.category }}
+            </div>
             <div class="mt-2">
                 <input type="file" name="images" accept="image/*" multiple class="form-control">
             </div>
@@ -23,16 +39,21 @@
 
 <div class="d-flex flex-column gap-3">
     {% for note in notes %}
-    <div class="card note-card">
+    <div class="card note-card {% if note.category == 'lost_and_found' %}border-warning{% endif %}">
         <div class="card-header note-card-header d-flex align-items-center gap-2">
             <div class="note-avatar">{{ note.author.first_name|default:note.author.username|first|upper }}</div>
-            <div>
+            <div class="flex-grow-1">
                 <div class="fw-semibold">{{ note.author.get_full_name|default:note.author.username }}</div>
                 <div class="text-muted small">
                     {{ note.created_at }}
                     {% if note.updated_at != note.created_at %}<span class="fst-italic">(edited)</span>{% endif %}
                 </div>
             </div>
+            {% if note.category == 'lost_and_found' %}
+            <span class="badge {% if note.is_claimed %}bg-secondary{% else %}bg-warning text-dark{% endif %}">
+                {% if note.is_claimed %}Claimed{% else %}Lost &amp; Found{% endif %}
+            </span>
+            {% endif %}
         </div>
         <div class="card-body">
             <p class="note-body mb-2">{{ note.body }}</p>
@@ -45,8 +66,11 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if note.author_id == user.id or user.is_superuser %}
-            <div class="d-flex gap-2">
+            {% if note.category == 'lost_and_found' and note.is_claimed %}
+            <p class="text-muted small mb-2">Claimed by {{ note.claimed_by.get_full_name|default:note.claimed_by.username }} on {{ note.claimed_at }}</p>
+            {% endif %}
+            {% if note.author_id == user.id or user.is_superuser or note.category == 'lost_and_found' %}
+            <div class="d-flex gap-2 flex-wrap">
                 {% if note.author_id == user.id %}
                 <a href="{% url 'notes:edit' note.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                 <form method="post" action="{% url 'notes:delete' note.pk %}"
@@ -54,6 +78,19 @@
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                 </form>
+                {% endif %}
+                {% if note.category == 'lost_and_found' %}
+                    {% if note.is_claimed %}
+                    <form method="post" action="{% url 'notes:unclaim' note.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Mark unclaimed</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{% url 'notes:claim' note.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success">Mark claimed</button>
+                    </form>
+                    {% endif %}
                 {% endif %}
                 {% if user.is_superuser %}
                 <form method="post" action="{% url 'notes:archive' note.pk %}">

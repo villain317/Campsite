@@ -11,4 +11,6 @@ urlpatterns = [
     path("<int:note_id>/delete/", views.note_delete, name="delete"),
     path("<int:note_id>/archive/", views.note_archive, name="archive"),
     path("<int:note_id>/unarchive/", views.note_unarchive, name="unarchive"),
+    path("<int:note_id>/claim/", views.note_claim, name="claim"),
+    path("<int:note_id>/unclaim/", views.note_unclaim, name="unclaim"),
 ]
