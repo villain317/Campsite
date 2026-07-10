@@ -13,5 +13,7 @@ urlpatterns = [
     path("<int:run_id>/update-notes/", views.update_notes, name="update_notes"),
     path("<int:run_id>/complete/", views.complete_run, name="complete_run"),
     path("item/<int:run_item_id>/toggle/", views.toggle_item, name="toggle_item"),
+    path("item/<int:item_id>/edit/", views.edit_item, name="edit_item"),
+    path("item/<int:item_id>/delete/", views.delete_item, name="delete_item"),
     path("<int:run_id>/delete/", views.delete_run, name="delete_run"),
 ]

@@ -2,6 +2,27 @@
 {% block title %}{{ checklist.name }} - Oakholm{% endblock %}
 {% block content %}
 
+<style>
+    #id_notes {
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    #id_notes.notes-save-success {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.15rem rgba(40, 167, 69, 0.25);
+    }
+    #id_notes.notes-save-error {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25);
+    }
+    #notes-save-status {
+        opacity: 0;
+        transition: opacity 0.6s ease;
+    }
+    #notes-save-status.notes-status-visible {
+        opacity: 1;
+    }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h3 class="mb-0">{{ checklist.name }}</h3>
     <a href="{% url 'checklists:completed_list' %}" class="btn btn-sm btn-outline-secondary">View completed checklists</a>
@@ -10,7 +31,7 @@
 
 <ul class="list-group mb-3">
     {% for run_item in run_items %}
-    <li class="list-group-item d-flex align-items-center">
+    <li class="list-group-item d-flex align-items-center" id="item-display-{{ run_item.item.pk }}">
         <input
             type="checkbox"
             class="form-check-input me-2 checklist-item-checkbox"
@@ -20,6 +41,31 @@
         <span class="checklist-item-label {% if run_item.checked %}text-decoration-line-through text-muted{% endif %}">
             {{ run_item.item.name }}
         </span>
+        <div class="ms-auto d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-link text-secondary p-0 item-edit-btn"
+                    data-item-id="{{ run_item.item.pk }}" title="Edit item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                </svg>
+            </button>
+            <form method="post" action="{% url 'checklists:delete_item' run_item.item.pk %}" class="d-inline mb-0 item-delete-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Delete item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L13.882 4H4.118zM2.5 3h11V2h-11v1z"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </li>
+    <li class="list-group-item d-none" id="item-edit-{{ run_item.item.pk }}">
+        <form method="post" action="{% url 'checklists:edit_item' run_item.item.pk %}" class="d-flex gap-2 align-items-center mb-0">
+            {% csrf_token %}
+            <input type="text" name="name" class="form-control form-control-sm" value="{{ run_item.item.name }}" required>
+            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary item-cancel-edit-btn" data-item-id="{{ run_item.item.pk }}">Cancel</button>
+        </form>
     </li>
     {% empty %}
     <li class="list-group-item text-muted">No items yet — add one below.</li>
@@ -52,7 +98,10 @@
     <button type="submit" class="btn btn-outline-secondary">Upload photo(s)</button>
 </form>
 
-<h5>Notes</h5>
+<h5 class="d-flex align-items-center gap-2">
+    Notes
+    <span id="notes-save-status" class="small fw-normal"></span>
+</h5>
 <form method="post" action="{% url 'checklists:update_notes' run.pk %}" class="mb-4" id="notes-form">
     {% csrf_token %}
     <textarea name="notes" id="id_notes" class="form-control mb-2" rows="3" placeholder="Optional notes about this checklist...">{{ run.notes }}</textarea>
@@ -94,6 +143,107 @@ document.querySelectorAll('.checklist-item-checkbox').forEach(function (checkbox
     });
 });
 
+document.querySelectorAll('.item-edit-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var id = btn.dataset.itemId;
+        document.getElementById('item-display-' + id).classList.add('d-none');
+        var editRow = document.getElementById('item-edit-' + id);
+        editRow.classList.remove('d-none');
+        var input = editRow.querySelector('input[name="name"]');
+        if (input) { input.focus(); input.select(); }
+    });
+});
+
+document.querySelectorAll('.item-cancel-edit-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        var id = btn.dataset.itemId;
+        document.getElementById('item-edit-' + id).classList.add('d-none');
+        document.getElementById('item-display-' + id).classList.remove('d-none');
+    });
+});
+
+document.querySelectorAll('.item-delete-form').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+        var label = form.closest('li').querySelector('.checklist-item-label');
+        var itemName = label ? label.textContent.trim() : 'this item';
+        if (!confirm('Delete "' + itemName + '"? Completed checklists that already checked it off will still show it, but it will no longer appear on this or future runs.')) {
+            e.preventDefault();
+        }
+    });
+});
+
+// --- Notes autosave ---
+// Saves 6 seconds after typing stops, or immediately on blur/manual save.
+// Shows a green outline + "Saved" note on success (fading after a couple
+// seconds), or a red outline + persistent "Could not save" note on failure.
+var notesTextarea = document.getElementById('id_notes');
+var notesForm = document.getElementById('notes-form');
+var notesStatusEl = document.getElementById('notes-save-status');
+var notesDebounceTimer = null;
+var notesStatusFadeTimer = null;
+var notesLastSaved = notesTextarea ? notesTextarea.value : '';
+var notesSaveInFlight = null;
+
+function setNotesStatus(text, cssClass, autoFade) {
+    clearTimeout(notesStatusFadeTimer);
+    notesStatusEl.textContent = text;
+    notesStatusEl.className = 'small fw-normal notes-status-visible ' + cssClass;
+    if (autoFade) {
+        notesStatusFadeTimer = setTimeout(function () {
+            notesStatusEl.classList.remove('notes-status-visible');
+        }, 2200);
+    }
+}
+
+function saveNotes() {
+    var currentValue = notesTextarea.value;
+    if (currentValue === notesLastSaved) {
+        return Promise.resolve();
+    }
+    setNotesStatus('Saving…', 'text-muted', false);
+    var data = new FormData();
+    data.append('notes', currentValue);
+    notesSaveInFlight = fetch(notesForm.action, {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: data,
+    })
+        .then(function (resp) {
+            if (!resp.ok) { throw new Error('Request failed'); }
+            notesLastSaved = currentValue;
+            notesTextarea.classList.remove('notes-save-error');
+            notesTextarea.classList.add('notes-save-success');
+            setNotesStatus('Saved', 'text-success', true);
+            setTimeout(function () {
+                notesTextarea.classList.remove('notes-save-success');
+            }, 2200);
+        })
+        .catch(function () {
+            notesTextarea.classList.remove('notes-save-success');
+            notesTextarea.classList.add('notes-save-error');
+            setNotesStatus('Could not save — will retry on your next change', 'text-danger', false);
+        });
+    return notesSaveInFlight;
+}
+
+if (notesTextarea && notesForm) {
+    notesTextarea.addEventListener('input', function () {
+        clearTimeout(notesDebounceTimer);
+        notesDebounceTimer = setTimeout(saveNotes, 6000);
+    });
+
+    notesTextarea.addEventListener('blur', function () {
+        clearTimeout(notesDebounceTimer);
+        saveNotes();
+    });
+
+    notesForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearTimeout(notesDebounceTimer);
+        saveNotes();
+    });
+}
+
 var completeForm = document.getElementById('complete-form');
 if (completeForm) {
     completeForm.addEventListener('submit', function (e) {
@@ -117,16 +267,10 @@ if (completeForm) {
             }));
         }
 
-        var notesTextarea = document.getElementById('id_notes');
-        if (notesTextarea && notesTextarea.value.trim().length > 0) {
-            var notesData = new FormData();
-            notesData.append('notes', notesTextarea.value);
-            tasks.push(fetch(document.getElementById('notes-form').action, {
-                method: 'POST',
-                headers: {'X-CSRFToken': '{{ csrf_token }}'},
-                body: notesData,
-            }));
-        }
+        // Make sure any pending notes edit is flushed before completing,
+        // regardless of where we are in the 6-second debounce window.
+        clearTimeout(notesDebounceTimer);
+        tasks.push(saveNotes());
 
         Promise.all(tasks)
             .then(function () {

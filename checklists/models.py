@@ -21,6 +21,12 @@ class ChecklistItem(models.Model):
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE, related_name="items")
     name = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Unchecked when an item is deleted. Kept around (rather than "
+        "hard-deleted) so completed checklist runs that already checked it off "
+        "keep showing it in their history.",
+    )
 
     class Meta:
         ordering = ["created_at", "id"]

@@ -16,8 +16,8 @@ class ChecklistAdmin(admin.ModelAdmin):
 
 @admin.register(ChecklistItem)
 class ChecklistItemAdmin(admin.ModelAdmin):
-    list_display = ("name", "checklist", "created_at")
-    list_filter = ("checklist",)
+    list_display = ("name", "checklist", "is_active", "created_at")
+    list_filter = ("checklist", "is_active")
 
 
 class ChecklistRunItemInline(admin.TabularInline):

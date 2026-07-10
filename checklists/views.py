@@ -12,14 +12,15 @@ from .models import Checklist, ChecklistImage, ChecklistItem, ChecklistRun, Chec
 
 def _get_or_create_active_run(user, checklist):
     """Get the user's in-progress run for this checklist, creating one if
-    needed, and make sure it has a ChecklistRunItem for every item currently
-    on the template (so items added later show up on runs already underway).
+    needed, and make sure it has a ChecklistRunItem for every active item
+    currently on the template (so items added later show up on runs already
+    underway, and deleted items don't get resurrected).
     """
     run, _ = ChecklistRun.objects.get_or_create(
         user=user, checklist=checklist, status=ChecklistRun.STATUS_IN_PROGRESS
     )
     existing_item_ids = set(run.run_items.values_list("item_id", flat=True))
-    missing_items = checklist.items.exclude(id__in=existing_item_ids)
+    missing_items = checklist.items.filter(is_active=True).exclude(id__in=existing_item_ids)
     ChecklistRunItem.objects.bulk_create(
         [ChecklistRunItem(run=run, item=item) for item in missing_items]
     )
@@ -79,6 +80,37 @@ def add_item(request, run_id):
     else:
         messages.error(request, "Item name can't be blank.")
     return redirect("checklists:run", checklist_id=run.checklist_id)
+
+
+@login_required
+@require_POST
+def edit_item(request, item_id):
+    item = get_object_or_404(ChecklistItem, pk=item_id, is_active=True)
+    name = request.POST.get("name", "").strip()
+    if name:
+        item.name = name
+        item.save()
+        messages.success(request, "Item updated.")
+    else:
+        messages.error(request, "Item name can't be blank.")
+    return redirect("checklists:run", checklist_id=item.checklist_id)
+
+
+@login_required
+@require_POST
+def delete_item(request, item_id):
+    item = get_object_or_404(ChecklistItem, pk=item_id, is_active=True)
+    checklist_id = item.checklist_id
+    item.is_active = False
+    item.save(update_fields=["is_active"])
+    # Drop it from any in-progress runs so it stops showing up as something to
+    # check off going forward. Leave it alone on completed runs so anyone who
+    # already checked it off keeps seeing it in that run's history.
+    ChecklistRunItem.objects.filter(
+        item=item, run__status=ChecklistRun.STATUS_IN_PROGRESS
+    ).delete()
+    messages.success(request, f"Removed '{item.name}' from {item.checklist.name}.")
+    return redirect("checklists:run", checklist_id=checklist_id)
 
 
 @login_required
