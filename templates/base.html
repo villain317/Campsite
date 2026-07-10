@@ -100,7 +100,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            flex-shrink: 0;
+            flex-shrink:0;
         }
         .note-body {
             white-space: pre-wrap;
@@ -157,6 +157,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'notes:list' %}">Notes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'guide' %}">Guide</a>
                 </li>
                 {% endif %}
             </ul>

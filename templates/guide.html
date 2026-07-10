@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Guide - Oakholm{% endblock %}
+{% block content %}
+
+<h3 class="mb-1">Guide</h3>
+<p class="text-muted mb-4">What you can do on this site, and what to expect.</p>
+
+<div class="row g-3">
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">Calendar</div>
+            <div class="card-body">
+                <p class="mb-2">The calendar is the home page. It shows three months at a time, with each stay shown as a colored pill on the days it covers.</p>
+                <ul class="mb-0">
+                    <li>Each family has its own color, shown in the legend above the calendar.</li>
+                    <li>Approved stays are shown in full color. Pending (not-yet-approved) stays are shown in gray.</li>
+                    <li>A request that includes people from more than one family shows up as a separate colored pill for each family involved.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">Requesting a stay</div>
+            <div class="card-body">
+                <p class="mb-2">Use <strong>Requests &rarr; Submit Request</strong> to ask for a stay at Oakholm.</p>
+                <ul class="mb-2">
+                    <li>Pick a start and end date.</li>
+                    <li>Under "Who's coming?", people are grouped by family, and within each family by household. Check a household's box to select everyone in it at once, or check people one at a time - both work together.</li>
+                    <li>Enter your best estimate of the total number of occupants.</li>
+                </ul>
+                <p class="mb-2">Once submitted, your request is <strong>pending</strong> until an approver reviews it. You'll see it on the calendar right away in gray.</p>
+                <p class="mb-0">Under <strong>Requests &rarr; Your Requests</strong>, you can see the status of everything you've submitted and edit any request (dates, attendees, occupant count) at any time, even after it's been approved.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">Approving requests</div>
+            <div class="card-body">
+                <p class="mb-2">If you're an approver, <strong>Requests &rarr; Approve Requests</strong> shows every pending request waiting on a decision.</p>
+                <ul class="mb-0">
+                    <li>Each request shows the requester, dates, attendees, and estimated occupants.</li>
+                    <li>If a request's dates overlap another pending or approved request, you'll see a warning listing the conflicting request(s).</li>
+                    <li>You can edit a request's details before approving or denying it, in case something needs adjusting first.</li>
+                    <li>Approve or deny with one click - the requester's calendar updates immediately.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">Email notifications</div>
+            <div class="card-body">
+                <p class="mb-2">When someone submits a new request, approvers can get an email about it. What you receive is controlled by the notification setting on your <a href="{% url 'accounts:profile' %}">Profile</a> page:</p>
+                <ul class="mb-0">
+                    <li><strong>Only requests from my own family</strong> (default) - you'll only hear about requests involving the family you head.</li>
+                    <li><strong>All requests, from any family</strong> - you'll hear about every new request, regardless of family.</li>
+                    <li><strong>Don't email me about requests</strong> - no request emails at all.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">Checklists</div>
+            <div class="card-body">
+                <p class="mb-2">Checklists are for things you want to walk through each time you're at Oakholm - opening up, closing down, restocking, and so on.</p>
+                <ul class="mb-0">
+                    <li><strong>Checklists &rarr; + Create Checklist</strong> sets up a new reusable checklist with its own items.</li>
+                    <li>Pick any checklist from the menu to run through it - check items off as you go, add photos, and jot down notes. Your progress is saved automatically as you go.</li>
+                    <li>When you're done, mark the run complete. It moves into <strong>Completed Checklists</strong>, where anyone can look back at past runs, their photos, and notes.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">Notes</div>
+            <div class="card-body">
+                <p class="mb-2">The <strong>Notes</strong> page is a shared board for anything worth leaving for the next people staying at Oakholm - a maintenance issue, a heads-up, a reminder.</p>
+                <ul class="mb-0">
+                    <li>Anyone can post a note.</li>
+                    <li>You can edit or delete your own notes at any time.</li>
+                    <li>Older notes can be archived to keep the board tidy (archiving is limited to admins).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">Feedback</div>
+            <div class="card-body">
+                <p class="mb-0">Have a suggestion or run into a problem with the site? Use the <strong>Feedback</strong> link to send it in.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header fw-semibold">Your account</div>
+            <div class="card-body">
+                <p class="mb-2">From the <strong>Account</strong> menu:</p>
+                <ul class="mb-0">
+                    <li><strong>Profile</strong> - update your name, username, email, profile photo, and email notification preference.</li>
+                    <li><strong>Change Password</strong> - update your password. If you ever forget it, use "Forgot password?" on the login page to reset it by email.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_superuser %}
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header fw-semibold">Admin (superuser only)</div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li><strong>Create Account</strong> - set up a login for a family member who doesn't have one yet. They'll get an email to set their own password.</li>
+                    <li><strong>Admin</strong> - the full Django admin, for managing families, households, people, and everything else directly.</li>
+                    <li><strong>Feedback &rarr; View Feedback</strong> - see everything submitted through the Feedback page.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

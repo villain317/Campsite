@@ -8,9 +8,11 @@ from django.urls import include, path, re_path
 from django.views.static import serve as serve_static
 
 from .forms import StyledPasswordChangeForm, StyledPasswordResetForm, StyledSetPasswordForm
+from .views import guide_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("guide/", guide_view, name="guide"),
     path(
         "login/",
         auth_views.LoginView.as_view(template_name="registration/login.html"),
