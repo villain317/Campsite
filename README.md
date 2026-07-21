@@ -18,6 +18,20 @@ Create an admin user:
 docker compose exec web python manage.py createsuperuser
 ```
 
+## Updating prod
+
+Pull the latest code, then rebuild and recreate the containers:
+
+```bash
+git pull
+docker compose up --build --force-recreate -d
+```
+
+`--build` rebuilds the image with the new code, and `--force-recreate`
+ensures containers are recreated even if the compose config didn't change.
+Migrations, `collectstatic`, and group seeding run automatically on
+container start via the entrypoint.
+
 ## Setting up families and people
 
 Everything is managed through the Django admin (`/admin/`):

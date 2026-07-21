@@ -52,10 +52,11 @@
                         <td class="day-cell {% if not day.in_month %}bg-light text-muted{% endif %} {% if day.is_today %}border border-primary border-2{% endif %}">
                             <div class="fw-bold small">{{ day.date.day }}</div>
                             {% for info in day.events %}
-                                <span class="event-pill" style="background-color: {{ info.color }};"
-                                      title="{{ info.attendee_names }} - {{ info.request.estimated_occupants }} occupants ({{ info.request.status }})">
-                                    {{ info.attendee_names|default:info.request.requested_by.username }} ({{ info.request.estimated_occupants }})
-                                </span>
+                                <a class="event-pill text-decoration-none" style="background-color: {{ info.color }};"
+                                   href="{% url 'reservations:request_detail' info.request.pk %}"
+                                   title="{{ info.attendee_names }} - {{ info.request.estimated_occupants }} occupants ({{ info.request.status }})">
+                                    {{ info.attendee_names_short|default:info.request.requested_by.username }} ({{ info.request.estimated_occupants }})
+                                </a>
                             {% endfor %}
                         </td>
                         {% endfor %}

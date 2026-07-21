@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Request Details - Oakholm{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <h3 class="mb-0">{{ r.start_date }} &ndash; {{ r.end_date }}</h3>
+    <span class="badge {% if r.status == 'approved' %}bg-success{% elif r.status == 'denied' %}bg-danger{% else %}bg-secondary{% endif %}">
+        {{ r.get_status_display }}
+    </span>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p class="card-text mb-2">
+            <strong>Family:</strong> {{ family.name|default:"—" }}
+        </p>
+        <p class="card-text mb-2">
+            <strong>Requested by:</strong> {{ r.requested_by.first_name|default:r.requested_by.username }}
+        </p>
+        <p class="card-text mb-2">
+            <strong>Estimated occupants:</strong> {{ r.estimated_occupants }}
+        </p>
+        <p class="card-text mb-2">
+            <strong>Attendees:</strong>
+            {% for person in r.people.all %}{{ person.full_name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+        </p>
+        <p class="card-text text-muted small mb-2">Requested on {{ r.requested_at }}</p>
+        {% if r.status != 'pending' %}
+        <p class="card-text text-muted small mb-0">
+            {{ r.get_status_display }} by {{ r.decided_by.first_name|default:r.decided_by.username }} on {{ r.decided_at }}
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+{% if overlaps %}
+<div class="mb-3">
+    <h6>Overlapping requests</h6>
+    <ul class="list-unstyled mb-0">
+        {% for o in overlaps %}
+        <li>
+            <a href="{% url 'reservations:request_detail' o.pk %}">
+                {{ o.start_date }} &ndash; {{ o.end_date }} ({{ o.get_status_display }})
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="d-flex gap-2">
+    <a href="{% url 'reservations:calendar' %}" class="btn btn-outline-secondary">Back to Calendar</a>
+    {% if is_owner %}
+    <a href="{% url 'reservations:request_edit' r.pk %}?next={% url 'reservations:request_detail' r.pk %}"
+       class="btn btn-outline-primary">Edit</a>
+    {% endif %}
+</div>
+
+{% endblock %}

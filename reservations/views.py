@@ -73,13 +73,19 @@ def calendar_view(request):
 
         for group in family_groups.values():
             family = group["family"]
-            attendee_names = ", ".join(p.full_name for p in group["members"])
+            names = [p.full_name for p in group["members"]]
+            attendee_names = ", ".join(names)
+            if len(names) > 3:
+                attendee_names_short = ", ".join(names[:3]) + ", …"
+            else:
+                attendee_names_short = attendee_names
             request_info.append(
                 {
                     "request": r,
                     "family": family,
                     "color": family.color if (family and r.status == ReservationRequest.STATUS_APPROVED) else "#adb5bd",
                     "attendee_names": attendee_names,
+                    "attendee_names_short": attendee_names_short,
                 }
             )
 
@@ -155,6 +161,25 @@ def my_requests_view(request):
         .order_by("-requested_at")
     )
     return render(request, "reservations/my_requests.html", {"requests": requests})
+
+
+@login_required
+def request_detail_view(request, pk):
+    reservation_request = get_object_or_404(
+        ReservationRequest.objects.select_related("requested_by", "decided_by").prefetch_related(
+            "people", "people__family"
+        ),
+        pk=pk,
+    )
+    is_owner = reservation_request.requested_by_id == request.user.id
+
+    context = {
+        "r": reservation_request,
+        "family": reservation_request.family,
+        "is_owner": is_owner,
+        "overlaps": reservation_request.overlapping_requests(),
+    }
+    return render(request, "reservations/request_detail.html", context)
 
 
 @login_required
